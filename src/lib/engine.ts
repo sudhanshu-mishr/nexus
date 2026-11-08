@@ -16,14 +16,15 @@ function classify(prompt:string):Category {
   return "generic";
 }
 function extractBrand(prompt:string):string {
-  const match=prompt.match(/(?:called|named)\s+["']?([A-Z][A-Za-z0-9&'-]{1,29})/i);
-  if (match?.[1]) return match[1].replace(/["']$/,"");
-  const forMatch=prompt.match(/\bfor\s+["']?([A-Z][A-Za-z0-9&'-]{1,24})/);
+  const match=prompt.match(/(?:called|named)\\s+["']?([A-Z][A-Za-z0-9&'-]*(?:\\s+[A-Z][A-Za-z0-9&'-]*){0,2})/);
+  if (match?.[1]) return match[1].trim().replace(/["']$/,"").slice(0,60);
+  const forMatch=prompt.match(/\\bfor\\s+["']?([A-Z][A-Za-z0-9&'-]{1,24})/);
   if (forMatch?.[1] && !/^(a|an|the)$/i.test(forMatch[1])) return forMatch[1];
   return "Your Brand";
 }
-function currencyFor(prompt:string):string {
-  return /(\binr\b|₹|rupee|india|indian)/i.test(prompt) ? "₹" : "$";
+function currencyFor(prompt:string,category:Category):string {
+  if (/($|\\binr\\b|₹|rupee|india|indian)/i.test(prompt)) return /($|\\binr\\b|₹|rupee|india|indian)/i.test(prompt) ? "₹" : "$";
+  return category==="cafe"||category==="fashion" ? "₹" : "$";
 }
 function sectionsFor(category:Category):Section[] {
   const types:Section["type"][]=category==="cafe"
@@ -38,7 +39,7 @@ function sectionsFor(category:Category):Section[] {
 }
 
 export function generateSpec(prompt:string):ProductSpec {
-  const t=prompt.toLowerCase(),category=classify(prompt),name=extractBrand(prompt),palette={...palettes[category]},currency=currencyFor(prompt);
+  const t=prompt.toLowerCase(),category=classify(prompt),name=extractBrand(prompt),palette={...palettes[category]},currency=currencyFor(prompt,category);
   if (/\b(orange|terracotta)\b/.test(t)) palette.primary="#bd642f";
   if (/\b(green|sage|forest)\b/.test(t)) palette.primary="#32734d";
   if (/\b(blue|navy)\b/.test(t)) palette.primary="#315fbd";
@@ -72,34 +73,34 @@ export function generateSpec(prompt:string):ProductSpec {
 export function applyEdit(spec:ProductSpec,request:string):ProductSpec|null {
   const next=structuredClone(spec),t=request.trim().toLowerCase();
   if (!t) return null;
-  if (/\b(dark|black|night mode)\b/.test(t)) next.design.theme="dark";
-  else if (/\b(light|bright mode)\b/.test(t)) next.design.theme="light";
-  else if (/\b(premium|spacious|elegant|luxury)\b/.test(t)) {next.design.spacing="spacious";next.design.radius=24;}
-  else if (/\b(minimal|compact|sharp)\b/.test(t)) {next.design.spacing="compact";next.design.radius=10;}
-  else if (/\b(green|sage)\b/.test(t)) next.design.palette.primary="#32734d";
-  else if (/\b(orange|terracotta)\b/.test(t)) next.design.palette.primary="#bd642f";
-  else if (/\b(blue|navy)\b/.test(t)) next.design.palette.primary="#315fbd";
-  else if (/\bpink\b/.test(t)) next.design.palette.primary="#bd6489";
-  else if (/\bpurple\b/.test(t)) next.design.palette.primary="#7652a8";
-  else if (/change (?:the )?name to|rename (?:it to )?/i.test(request)) {
-    const match=request.match(/(?:change (?:the )?name to|rename (?:it to )?)\s*["']?(.+?)["']?$/i);
-    if (!match?.[1]) return null;
-    next.meta.name=match[1].trim().replace(/["']$/,"").slice(0,60);
-  } else if (/change (?:the )?tagline to/i.test(request)) {
-    const match=request.match(/change (?:the )?tagline to\s*["']?(.+?)["']?$/i);
-    if (!match?.[1]) return null;
-    next.meta.tagline=match[1].trim().replace(/["']$/,"").slice(0,120);
-  } else if (/add (?:a )?(?:testimonial|reviews?)/i.test(request)) {
-    if (next.pages[0].sections.some(s=>s.type==="testimonials")) return null;
-    next.pages[0].sections.push({id:"testimonials-"+Date.now(),type:"testimonials",title:"What people are saying"});
-  } else if (/add (?:a )?contact/i.test(request)) {
-    if (next.pages[0].sections.some(s=>s.type==="contact")) return null;
-    next.pages[0].sections.push({id:"contact-"+Date.now(),type:"contact",title:"Get in touch"});
-  } else if (/add (?:a )?pricing/i.test(request)) {
-    if (next.pages[0].sections.some(s=>s.type==="pricing")) return null;
-    next.pages[0].sections.push({id:"pricing-"+Date.now(),type:"pricing",title:"Plans and pricing"});
-  } else if (/add (?:a )?(?:product|item)/i.test(request)) {
-    next.data.items.push({id:"item-"+Date.now(),name:"New item "+(next.data.items.length+1),description:"Add your own description for this item.",details:"This is a sample item. Replace its details and price with your own.",price:next.meta.category==="cafe"?"₹0":"$0",category:"New",badge:"Just added"});
-  } else return null;
-  return ProductSpecSchema.parse(next);
+  let changed=false;
+
+  if (/\\b(dark|black|night mode)\\b/.test(t)) {next.design.theme="dark";changed=true;}
+  if (/\\b(light|bright mode)\\b/.test(t)) {next.design.theme="light";changed=true;}
+  if (/\\b(premium|spacious|elegant|luxury)\\b/.test(t)) {next.design.spacing="spacious";next.design.radius=24;changed=true;}
+  if (/\\b(minimal|compact|sharp)\\b/.test(t)) {next.design.spacing="compact";next.design.radius=10;changed=true;}
+  if (/\\b(green|sage)\\b/.test(t)) {next.design.palette.primary="#32734d";changed=true;}
+  if (/\\b(orange|terracotta)\\b/.test(t)) {next.design.palette.primary="#bd642f";changed=true;}
+  if (/\\b(blue|navy)\\b/.test(t)) {next.design.palette.primary="#315fbd";changed=true;}
+  if (/\\bpink\\b/.test(t)) {next.design.palette.primary="#bd6489";changed=true;}
+  if (/\\bpurple\\b/.test(t)) {next.design.palette.primary="#7652a8";changed=true;}
+
+  const rename=request.match(/(?:change (?:the )?name to|rename (?:it to)?)\\s*["']?(.+?)["']?$/i);
+  if (rename?.[1]) {next.meta.name=rename[1].trim().replace(/["']$/,"").slice(0,60);changed=true;}
+  const tagline=request.match(/change (?:the )?tagline to\\s*["']?(.+?)["']?$/i);
+  if (tagline?.[1]) {next.meta.tagline=tagline[1].trim().replace(/["']$/,"").slice(0,120);changed=true;}
+
+  const addSection=(type:Section["type"],title:string)=>{
+    if(next.pages[0].sections.some(section=>section.type===type)) return;
+    next.pages[0].sections.push({id:type+"-"+Date.now(),type,title});
+    changed=true;
+  };
+  if (/add (?:a )?(?:testimonial|reviews?)/i.test(request)) addSection("testimonials","What people are saying");
+  if (/add (?:a )?contact/i.test(request)) addSection("contact","Get in touch");
+  if (/add (?:a )?pricing/i.test(request)) addSection("pricing","Plans and pricing");
+  if (/add (?:a )?(?:product|item)/i.test(request)) {
+    next.data.items.push({id:"item-"+Date.now(),name:"New item "+(next.data.items.length+1),description:"Add your own description for this item.",details:"This is a sample item. Replace its details and price with your own.",price:next.meta.category==="cafe"||next.meta.category==="fashion"?"₹0":"$0",category:"New",badge:"Just added"});
+    changed=true;
+  }
+  return changed ? ProductSpecSchema.parse(next) : null;
 }
