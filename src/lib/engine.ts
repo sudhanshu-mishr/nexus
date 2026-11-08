@@ -23,7 +23,7 @@ function extractBrand(prompt:string):string {
   return "Your Brand";
 }
 function currencyFor(prompt:string,category:Category):string {
-  if (/($|\binr\b|₹|rupee|india|indian)/i.test(prompt)) return /($|\binr\b|₹|rupee|india|indian)/i.test(prompt) ? "₹" : "$";
+  if (/\binr\b|₹|rupee|india|indian/i.test(prompt)) return "₹";
   return category==="cafe"||category==="fashion" ? "₹" : "$";
 }
 function sectionsFor(category:Category):Section[] {
