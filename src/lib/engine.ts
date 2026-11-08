@@ -16,14 +16,14 @@ function classify(prompt:string):Category {
   return "generic";
 }
 function extractBrand(prompt:string):string {
-  const match=prompt.match(/(?:called|named)\\s+["']?([A-Z][A-Za-z0-9&'-]*(?:\\s+[A-Z][A-Za-z0-9&'-]*){0,2})/);
+  const match=prompt.match(/(?:called|named)\s+["']?([A-Z][A-Za-z0-9&'-]*(?:\s+[A-Z][A-Za-z0-9&'-]*){0,2})/);
   if (match?.[1]) return match[1].trim().replace(/["']$/,"").slice(0,60);
-  const forMatch=prompt.match(/\\bfor\\s+["']?([A-Z][A-Za-z0-9&'-]{1,24})/);
+  const forMatch=prompt.match(/\bfor\s+["']?([A-Z][A-Za-z0-9&'-]{1,24})/);
   if (forMatch?.[1] && !/^(a|an|the)$/i.test(forMatch[1])) return forMatch[1];
   return "Your Brand";
 }
 function currencyFor(prompt:string,category:Category):string {
-  if (/($|\\binr\\b|₹|rupee|india|indian)/i.test(prompt)) return /($|\\binr\\b|₹|rupee|india|indian)/i.test(prompt) ? "₹" : "$";
+  if (/($|\binr\b|₹|rupee|india|indian)/i.test(prompt)) return /($|\binr\b|₹|rupee|india|indian)/i.test(prompt) ? "₹" : "$";
   return category==="cafe"||category==="fashion" ? "₹" : "$";
 }
 function sectionsFor(category:Category):Section[] {
@@ -75,19 +75,19 @@ export function applyEdit(spec:ProductSpec,request:string):ProductSpec|null {
   if (!t) return null;
   let changed=false;
 
-  if (/\\b(dark|black|night mode)\\b/.test(t)) {next.design.theme="dark";changed=true;}
-  if (/\\b(light|bright mode)\\b/.test(t)) {next.design.theme="light";changed=true;}
-  if (/\\b(premium|spacious|elegant|luxury)\\b/.test(t)) {next.design.spacing="spacious";next.design.radius=24;changed=true;}
-  if (/\\b(minimal|compact|sharp)\\b/.test(t)) {next.design.spacing="compact";next.design.radius=10;changed=true;}
-  if (/\\b(green|sage)\\b/.test(t)) {next.design.palette.primary="#32734d";changed=true;}
-  if (/\\b(orange|terracotta)\\b/.test(t)) {next.design.palette.primary="#bd642f";changed=true;}
-  if (/\\b(blue|navy)\\b/.test(t)) {next.design.palette.primary="#315fbd";changed=true;}
-  if (/\\bpink\\b/.test(t)) {next.design.palette.primary="#bd6489";changed=true;}
-  if (/\\bpurple\\b/.test(t)) {next.design.palette.primary="#7652a8";changed=true;}
+  if (/\b(dark|black|night mode)\b/.test(t)) {next.design.theme="dark";changed=true;}
+  if (/\b(light|bright mode)\b/.test(t)) {next.design.theme="light";changed=true;}
+  if (/\b(premium|spacious|elegant|luxury)\b/.test(t)) {next.design.spacing="spacious";next.design.radius=24;changed=true;}
+  if (/\b(minimal|compact|sharp)\b/.test(t)) {next.design.spacing="compact";next.design.radius=10;changed=true;}
+  if (/\b(green|sage)\b/.test(t)) {next.design.palette.primary="#32734d";changed=true;}
+  if (/\b(orange|terracotta)\b/.test(t)) {next.design.palette.primary="#bd642f";changed=true;}
+  if (/\b(blue|navy)\b/.test(t)) {next.design.palette.primary="#315fbd";changed=true;}
+  if (/\bpink\b/.test(t)) {next.design.palette.primary="#bd6489";changed=true;}
+  if (/\bpurple\b/.test(t)) {next.design.palette.primary="#7652a8";changed=true;}
 
-  const rename=request.match(/(?:change (?:the )?name to|rename (?:it to)?)\\s*["']?(.+?)["']?$/i);
+  const rename=request.match(/(?:change (?:the )?name to|rename (?:it to)?)\s*["']?(.+?)["']?$/i);
   if (rename?.[1]) {next.meta.name=rename[1].trim().replace(/["']$/,"").slice(0,60);changed=true;}
-  const tagline=request.match(/change (?:the )?tagline to\\s*["']?(.+?)["']?$/i);
+  const tagline=request.match(/change (?:the )?tagline to\s*["']?(.+?)["']?$/i);
   if (tagline?.[1]) {next.meta.tagline=tagline[1].trim().replace(/["']$/,"").slice(0,120);changed=true;}
 
   const addSection=(type:Section["type"],title:string)=>{
