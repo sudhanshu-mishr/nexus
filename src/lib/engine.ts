@@ -98,7 +98,7 @@ function sectionsFor(category: Category, prompt: string): Section[] {
   if (/\b(stats|metrics|analytics|performance)\b/i.test(prompt) && category !== "saas") requested.add("stats");
   const types = [...defaults[category]];
   for (const type of requested) if (!types.includes(type)) types.splice(Math.max(1, types.length - 1), 0, type);
-  return types.map((type, index) => ({ id: type + "-" + index, type, title: titles[type] }));
+  return types.map((type, index) => ({ id: type + "-" + index, type, title: titles[type], cards: [] }));
 }
 
 function sampleItems(category: Category, currency: string): Array<[string, string, string, string, string]> {
