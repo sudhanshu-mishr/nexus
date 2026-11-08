@@ -4,6 +4,9 @@ import {ArrowUpRight,Check,Monitor,RotateCcw,Smartphone,Sparkles,Tablet,WandSpar
 import {generateSpec,applyEdit} from "@/lib/engine";
 import type {ProductSpec} from "@/lib/spec";
 import {Preview} from "@/components/Preview";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast as sonnerToast } from "sonner";
 type Version={label:string;spec:ProductSpec;createdAt:number};
 const KEY="nexus-project";
 const examples=[
@@ -12,11 +15,11 @@ const examples=[
  {label:"SaaS dashboard",prompt:"Create a modern SaaS analytics dashboard called Northstar with metrics, charts, a customer activity table and a dark theme."}
 ];
 export default function Home(){
- const [prompt,setPrompt]=useState(examples[0].prompt),[versions,setVersions]=useState<Version[]>([]),[active,setActive]=useState(0),[edit,setEdit]=useState(""),[device,setDevice]=useState<"desktop"|"tablet"|"mobile">("desktop"),[toast,setToast]=useState(""),[loaded,setLoaded]=useState(false);
+ const [prompt,setPrompt]=useState(examples[0].prompt),[versions,setVersions]=useState<Version[]>([]),[active,setActive]=useState(0),[edit,setEdit]=useState(""),[device,setDevice]=useState<"desktop"|"tablet"|"mobile">("desktop"),[loaded,setLoaded]=useState(false);
  const current=versions[active];
  useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const parsed=JSON.parse(raw) as Version[];if(Array.isArray(parsed)&&parsed.every(v=>v?.spec?.schemaVersion==="1.0.0")){setVersions(parsed);setActive(Math.max(0,parsed.length-1));}}}catch{localStorage.removeItem(KEY);}finally{setLoaded(true);}},[]);
  useEffect(()=>{if(!loaded)return;if(versions.length)localStorage.setItem(KEY,JSON.stringify(versions));else localStorage.removeItem(KEY);},[versions,loaded]);
- function notify(message:string){setToast(message);window.setTimeout(()=>setToast(""),2600);}
+ function notify(message:string){sonnerToast(message);}
  function save(label:string,spec:ProductSpec){const next=[...versions.slice(0,active+1),{label,spec,createdAt:Date.now()}].slice(-30);setVersions(next);setActive(next.length-1);}
  function generate(){if(!prompt.trim())return;try{save("Initial concept",generateSpec(prompt.trim()));notify("Interactive preview ready.");}catch(error){console.error(error);notify("Could not create preview. Previous version is safe.");}}
  function refine(){if(!current||!edit.trim())return;const next=applyEdit(current.spec,edit);if(!next){notify("Try: dark theme, premium, change name to…, change tagline to…, add contact, add pricing, or add a product.");return;}save(edit.trim().slice(0,48),next);setEdit("");notify("New version saved.");}
@@ -28,7 +31,7 @@ export default function Home(){
   <div className="max-w-4xl rise"><div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-xs text-amber-200"><Sparkles size={14}/> From idea to interactive preview</div>
    <h1 className="font-display text-5xl leading-[1.02] md:text-7xl">Your next digital idea,<br/><span className="text-amber-300">made visible.</span></h1>
    <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Describe the website or app you imagine. Nexus turns it into a frontend concept you can explore, interact with and refine.</p>
-   <div className="glass mt-10 rounded-3xl p-4 md:p-6"><textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")generate();}} className="min-h-36 w-full resize-y bg-transparent p-2 text-base leading-7 text-white outline-none" placeholder="Describe the website or app you want to see..."/><div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4"><span className="text-xs text-zinc-500">Press Ctrl / ⌘ + Enter to generate. No API key required.</span><button onClick={generate} disabled={!prompt.trim()} className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40">Generate preview <ArrowUpRight size={16}/></button></div></div>
+   <div className="glass mt-10 rounded-3xl p-4 md:p-6"><Textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")generate();}} className="min-h-36 w-full resize-y border-0 bg-transparent p-2 text-base leading-7 text-white shadow-none focus-visible:ring-0" placeholder="Describe the website or app you want to see..."/><div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4"><span className="text-xs text-zinc-500">Press Ctrl / ⌘ + Enter to generate. No API key required.</span><Button onClick={generate} disabled={!prompt.trim()} size="lg">Generate preview <ArrowUpRight size={16}/></Button></div></div>
    <div className="mt-7 grid gap-3 md:grid-cols-3">{examples.map(x=><button key={x.label} onClick={()=>setPrompt(x.prompt)} className="rounded-2xl border border-white/10 p-4 text-left hover:border-amber-300/40"><span className="text-[10px] uppercase tracking-wider text-amber-200/70">{x.label}</span><p className="mt-2 text-xs leading-5 text-zinc-400">{x.prompt}</p></button>)}</div>
   </div><footer className="mt-20 text-xs text-zinc-600">Nexus Preview Studio · Prototype · Browser-local project storage</footer>
  </div>:<div className="min-h-screen">
@@ -39,6 +42,6 @@ export default function Home(){
     <p className="mt-8 text-xs leading-5 text-zinc-600">Cart, forms, checkout, maps and dashboard data are preview simulations. No real orders or messages are sent.</p><button onClick={reset} className="mt-5 w-full rounded-xl border border-white/10 py-3 text-xs text-zinc-400 hover:bg-white/5">Start a new project</button>
    </aside></div>
  </div>}
- {toast&&<div role="status" className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-white px-5 py-3 text-xs text-zinc-900 shadow-xl">{toast}</div>}
+
  </main>;
 }
