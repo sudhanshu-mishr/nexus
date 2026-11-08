@@ -8,11 +8,14 @@
 - [x] Basic edit grammar and browser-local version history
 
 ## M1 — preview quality
-- [ ] More design directions per category
-- [ ] Better requirement extraction and page navigation
-- [ ] Product detail modal and richer dashboard interactions
-- [ ] Asset uploads and optional image provider
-- [ ] Automated parser/generator/renderer tests
+- [x] More category-specific content and design direction
+- [x] Better prompt classification and brand-name extraction
+- [x] Product filters and product-detail modal
+- [x] Dashboard metrics, sample chart and activity table
+- [x] More edit commands (theme, palette, name, tagline, sections, items)
+- [x] Add automated engine tests and GitHub Actions checks
+- [ ] Add real image/asset selection and upload workflow
+- [ ] Expand layout recipes and accessibility review
 
 ## M2 — project workflow
 - [ ] Version comparison and restore
