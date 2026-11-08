@@ -4,6 +4,8 @@ import {ArrowUpRight,Check,Monitor,RotateCcw,Smartphone,Sparkles,Tablet,WandSpar
 import {generateSpec,applyEdit} from "@/lib/engine";
 import type {ProductSpec} from "@/lib/spec";
 import {Preview} from "@/components/Preview";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 type Version={label:string;spec:ProductSpec;createdAt:number};
 const KEY="nexus-project";
 const examples=[
@@ -28,7 +30,7 @@ export default function Home(){
   <div className="max-w-4xl rise"><div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-xs text-amber-200"><Sparkles size={14}/> From idea to interactive preview</div>
    <h1 className="font-display text-5xl leading-[1.02] md:text-7xl">Your next digital idea,<br/><span className="text-amber-300">made visible.</span></h1>
    <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Describe the website or app you imagine. Nexus turns it into a frontend concept you can explore, interact with and refine.</p>
-   <div className="glass mt-10 rounded-3xl p-4 md:p-6"><textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")generate();}} className="min-h-36 w-full resize-y bg-transparent p-2 text-base leading-7 text-white outline-none" placeholder="Describe the website or app you want to see..."/><div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4"><span className="text-xs text-zinc-500">Press Ctrl / ⌘ + Enter to generate. No API key required.</span><button onClick={generate} disabled={!prompt.trim()} className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40">Generate preview <ArrowUpRight size={16}/></button></div></div>
+   <div className="glass mt-10 rounded-3xl p-4 md:p-6"><Textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")generate();}} className="min-h-36 w-full resize-y border-0 bg-transparent p-2 text-base leading-7 text-white shadow-none focus-visible:ring-0" placeholder="Describe the website or app you want to see..."/><div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4"><span className="text-xs text-zinc-500">Press Ctrl / ⌘ + Enter to generate. No API key required.</span><Button onClick={generate} disabled={!prompt.trim()} size="lg">Generate preview <ArrowUpRight size={16}/></Button></div></div>
    <div className="mt-7 grid gap-3 md:grid-cols-3">{examples.map(x=><button key={x.label} onClick={()=>setPrompt(x.prompt)} className="rounded-2xl border border-white/10 p-4 text-left hover:border-amber-300/40"><span className="text-[10px] uppercase tracking-wider text-amber-200/70">{x.label}</span><p className="mt-2 text-xs leading-5 text-zinc-400">{x.prompt}</p></button>)}</div>
   </div><footer className="mt-20 text-xs text-zinc-600">Nexus Preview Studio · Prototype · Browser-local project storage</footer>
  </div>:<div className="min-h-screen">
