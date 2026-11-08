@@ -2,31 +2,27 @@
 
 Nexus is an early-stage prompt-to-preview product. A user describes a website or app, sees an interactive frontend concept, and refines it through short natural-language edits.
 
-## Current milestone: M0 (local, API-free vertical slice)
+## Current milestone: M1 — richer local previews
 
-This repository starts with a deterministic local generation engine. It does not call Gemini or any external AI API.
+The current implementation uses a deterministic local generation engine. It does not call Gemini or any external AI API.
 
-### Included in this baseline
-- Next.js 14 App Router + TypeScript + Tailwind CSS
-- Local intent classification for cafe, fashion, SaaS/dashboard and general concepts
-- Zod-validated ProductSpec
-- Interactive preview renderer with category-aware sections
-- Responsive desktop / tablet / mobile preview widths
-- Simulated product bag, category filters and form validation
-- Small edit grammar (theme, spacing, primary color, testimonials)
-- Append-only local version history in browser storage
-- Failed/unsupported edits do not replace the current successful preview
+### Included
+- Next.js 14 App Router, TypeScript and Tailwind CSS
+- Prompt classification for cafes/restaurants, fashion storefronts, SaaS dashboards and general business concepts
+- Multi-word brand-name extraction and prompt-derived color/theme choices
+- Zod-validated `ProductSpec` as the boundary between generation and rendering
+- Category-aware interactive frontend sections
+- Responsive desktop, tablet and mobile preview widths
+- Product/menu category filters and product-detail modal
+- Simulated product bag and form interactions
+- SaaS stat cards, sample activity chart and activity table
+- Structured edits for theme, palette, spacing, name, tagline, sections and items
+- Browser-local version history, capped at 30 snapshots
+- Unit tests with Vitest and GitHub Actions CI workflow
 
-### Honest limitations
-- This is a prototype, not a production website generator.
-- Generation is deterministic heuristics + curated recipes/content, not an LLM.
-- Only supported categories and edit vocabulary are covered.
-- Cart and form actions are simulated; no orders, payments, email or backend are connected.
-- Projects are stored in the current browser's localStorage; there is no account sync yet.
-- No real photography or image provider is connected.
-- No Supabase or Gemini environment variables are needed for M0.
+### Run locally
 
-## Run locally
+Requirements: Node.js 20 or later and npm.
 
 ```bash
 npm install
@@ -35,20 +31,27 @@ npm run dev
 
 Open http://localhost:3000.
 
-## Quality checks
+### Quality checks
 
 ```bash
 npm run typecheck
-npm run lint
+npm test
 npm run build
 ```
 
-These checks have not yet been run in this environment. Run them after installing dependencies before treating the baseline as production-ready.
+### Current edit examples
+- `make it dark and premium`
+- `change name to Chai House`
+- `change tagline to A warmer cup, every day`
+- `make it green`
+- `add a contact section`
+- `add pricing`
+- `add a product`
 
-## Product principles
-1. Preview is the product's center of gravity; editing UI stays secondary.
-2. Render validated structured data through trusted React components.
-3. Never execute arbitrary AI-generated JavaScript or HTML.
-4. Never let a failed generation/edit replace the last successful preview.
-5. Label simulated interactions honestly.
-6. Keep the generation provider replaceable; an AI provider can be added later without rewriting the renderer.
+## Honest limitations
+
+This is a frontend concept generator, not a production website deployment service yet. Sample metrics, products, testimonials, locations and prices are illustrative. Cart, checkout, forms, maps and analytics are not connected to real services. Projects are stored in the current browser only; Supabase persistence and authentication are future milestones.
+
+## Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the data flow and safety boundaries, and [docs/ROADMAP.md](docs/ROADMAP.md) for planned milestones.
