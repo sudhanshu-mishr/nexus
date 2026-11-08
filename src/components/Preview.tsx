@@ -50,6 +50,22 @@ export function Preview({spec}:{spec:ProductSpec}) {
       {section.type==="contact"&&<div className="grid gap-8 md:grid-cols-2"><div><p className="mb-3 text-[10px] uppercase tracking-[.2em]" style={{color:"var(--primary)"}}>Start a conversation</p>{title(section.title)}<p className="mt-5 max-w-sm text-sm leading-7 opacity-60">Have a question or an idea? Send a note. This is a preview form and will not send a real message.</p></div><form className="grid gap-3" onSubmit={e=>{e.preventDefault();setNotice("Demo form validated. No message was sent.");}}><input required placeholder="Your name" className="rounded-xl border bg-transparent px-4 py-3 text-sm" style={{borderColor:"var(--border)"}}/><input required type="email" placeholder="Email address" className="rounded-xl border bg-transparent px-4 py-3 text-sm" style={{borderColor:"var(--border)"}}/><textarea required placeholder="Tell us a little about it..." className="min-h-28 rounded-xl border bg-transparent px-4 py-3 text-sm" style={{borderColor:"var(--border)"}}/><button className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-xs font-semibold text-white" style={{background:"var(--primary)"}}>Send message <ArrowUpRight size={14}/></button></form></div>}
 
       {section.type==="cta"&&<div className="rounded-3xl p-8 text-center text-white md:p-16" style={{background:"linear-gradient(130deg,var(--primary),var(--accent))"}}><p className="text-[10px] uppercase tracking-[.25em] text-white/70">The next step</p><h2 className="mx-auto mt-4 max-w-2xl font-display text-4xl md:text-6xl">{section.title}</h2><p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-white/75">Make this experience your own. Start with the details that matter most.</p><button onClick={()=>setNotice("This call to action is a preview. No service is connected.")} className="mt-8 rounded-full bg-white px-6 py-3 text-xs font-semibold" style={{color:"var(--primary)"}}>Get started <ArrowUpRight size={14} className="ml-2 inline"/></button></div>}
+      {section.type==="custom"&&<div className="space-y-8">
+        <div className={section.layout==="editorial"?"max-w-3xl":""}>
+          {section.eyebrow&&<p className="mb-3 text-[10px] uppercase tracking-[.22em]" style={{color:"var(--primary)"}}>{section.eyebrow}</p>}
+          {section.title&&title(section.title)}
+          {section.subtitle&&<p className="mt-4 max-w-2xl text-lg leading-7 opacity-70">{section.subtitle}</p>}
+          {section.description&&<p className="mt-4 max-w-3xl text-sm leading-7 opacity-65">{section.description}</p>}
+        </div>
+        {section.cards.length>0&&<div className={section.layout==="stack"?"space-y-3":section.layout==="split"?"grid gap-5 md:grid-cols-2":"grid gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+          {section.cards.map((card,index)=><article key={card.title+index} className="rounded-2xl border p-6 md:p-7" style={cardStyle}>
+            {card.label&&<p className="mb-5 text-[10px] uppercase tracking-[.18em]" style={{color:"var(--primary)"}}>{card.label}</p>}
+            {card.value&&<p className="mb-3 font-display text-4xl" style={{color:"var(--primary)"}}>{card.value}</p>}
+            <h3 className="font-display text-2xl leading-tight">{card.title}</h3>
+            <p className="mt-3 text-sm leading-6 opacity-65">{card.description}</p>
+          </article>)}
+        </div>}
+      </div>}
     </div></section>)}
 
     <footer className="px-6 py-10 text-center text-[10px] uppercase tracking-[.18em] opacity-40">Frontend concept preview · Sample content · Integrations are not connected</footer>
