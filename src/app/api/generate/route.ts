@@ -35,9 +35,17 @@ Schema:
 }
 Include data keys even when arrays are empty. At least one page, 3-12 sections per page. Keep the result coherent and tailored.`;
 
-function getText(result: { text?: string | (()=>string) }) {
-  return typeof result.text==="function" ? result.text() : result.text ?? "";
-}
+const WEBSITE_JSON_SCHEMA={
+  type:"object",
+  properties:{
+    schemaVersion:{type:"string",enum:["1.0.0"]},
+    meta:{type:"object",properties:{name:{type:"string"},category:{type:"string"},tagline:{type:"string"},description:{type:"string"}},required:["name","category","tagline","description"]},
+    design:{type:"object",properties:{theme:{type:"string",enum:["light","dark"]},palette:{type:"object",properties:{bg:{type:"string"},surface:{type:"string"},text:{type:"string"},muted:{type:"string"},primary:{type:"string"},accent:{type:"string"},border:{type:"string"}},required:["bg","surface","text","muted","primary","accent","border"]},spacing:{type:"string",enum:["compact","standard","spacious"]},radius:{type:"integer"}},required:["theme","palette","spacing","radius"]},
+    pages:{type:"array",maxItems:1,items:{type:"object",properties:{id:{type:"string"},label:{type:"string"},sections:{type:"array",minItems:3,maxItems:12,items:{type:"object",properties:{id:{type:"string"},type:{type:"string",enum:["hero","about","features","menu","products","pricing","testimonials","locations","contact","stats","chart","table","cta","custom"]},title:{type:"string"},subtitle:{type:"string"},eyebrow:{type:"string"},description:{type:"string"},layout:{type:"string",enum:["split","grid","stack","editorial","banner","metrics"]},cards:{type:"array",maxItems:8,items:{type:"object",properties:{label:{type:"string"},title:{type:"string"},description:{type:"string"},value:{type:"string"}},required:["title","description"]}}},required:["id","type","cards"]}}},required:["id","label","sections"]}},
+    data:{type:"object",properties:{items:{type:"array",items:{type:"object",properties:{id:{type:"string"},name:{type:"string"},description:{type:"string"},price:{type:"string"},category:{type:"string"},badge:{type:"string"},details:{type:"string"}},required:["id","name","description","price","category"]}},stats:{type:"array",items:{type:"object",properties:{label:{type:"string"},value:{type:"string"},change:{type:"string"}},required:["label","value"]}},testimonials:{type:"array",items:{type:"object",properties:{quote:{type:"string"},author:{type:"string"},role:{type:"string"}},required:["quote","author"]}},activities:{type:"array",items:{type:"object",properties:{id:{type:"string"},title:{type:"string"},detail:{type:"string"},status:{type:"string"},amount:{type:"string"}},required:["id","title","detail","status"]}}},required:["items","stats","testimonials","activities"]}
+  },
+  required:["schemaVersion","meta","design","pages","data"]
+};
 
 export async function POST(request:Request) {
   try {
@@ -45,18 +53,20 @@ export async function POST(request:Request) {
     if(!apiKey) return NextResponse.json({error:"Gemini is not configured. Add GEMINI_API_KEY to .env.local and your Vercel environment variables."},{status:503});
     const body=RequestSchema.parse(await request.json());
     const ai=new GoogleGenAI({apiKey});
-    const model=process.env.GEMINI_MODEL||"gemini-2.5-flash";
+    const model=process.env.GEMINI_MODEL||"gemini-3.8-flash";
     const task=body.mode==="edit"
       ? `EDIT REQUEST: ${body.prompt}\nCURRENT VALID WEBSITE SPECIFICATION:\n${JSON.stringify(body.currentSpec)}\nReturn the complete updated specification. Preserve unrelated parts.`
       : `NEW WEBSITE BRIEF:\n${body.prompt}\nCreate a complete bespoke specification.`;
     let lastError="The model returned invalid JSON.";
     for(let attempt=0;attempt<2;attempt++){
-      const result=await ai.models.generateContent({
+      const interaction=await ai.interactions.create({
         model,
-        contents:attempt===0?task:`${task}\n\nYour previous response failed validation: ${lastError}. Correct the issues and return valid complete JSON only.`,
-        config:{systemInstruction:SYSTEM_INSTRUCTIONS,responseMimeType:"application/json",temperature:attempt===0?0.85:0.35},
+        input:attempt===0?task:`${task}\n\nYour previous response failed validation: ${lastError}. Correct the issues and return valid complete JSON only.`,
+        system_instruction:SYSTEM_INSTRUCTIONS,
+        response_format:{type:"text",mime_type:"application/json",schema:WEBSITE_JSON_SCHEMA},
+        generation_config:{temperature:attempt===0?0.85:0.35,max_output_tokens:12000},
       });
-      const raw=getText(result).trim();
+      const raw=(interaction.output_text||"").trim();
       try {
         const parsed=ProductSpecSchema.parse(JSON.parse(raw));
         return NextResponse.json({spec:parsed,model});
