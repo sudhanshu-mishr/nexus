@@ -7,6 +7,9 @@ Nexus is an early-stage prompt-to-preview product. A user describes a website or
 The current implementation uses a deterministic local generation engine. It does not call Gemini or any external AI API.
 
 ### Included
+- shadcn-style component primitives (Button, Badge, Card, Dialog, Input, Textarea, Separator) with Radix UI accessibility foundations
+- Brand-token bridge: generated preview palettes theme the shared component primitives per customer, including product detail dialogs and dashboard cards
+- Sonner toast provider for platform feedback
 - Next.js 14 App Router, TypeScript and Tailwind CSS
 - Expanded prompt classification for cafes/restaurants, fashion, SaaS dashboards, portfolios, agencies, education, fitness, real estate and general business concepts
 - Quoted and multi-word brand-name extraction, explicit currency parsing, and prompt-derived color/theme/spacing choices
@@ -30,6 +33,10 @@ npm run dev
 ```
 
 Open http://localhost:3000.
+
+### UI component setup
+
+The project remains on Tailwind CSS 3.4 to avoid a framework migration during this milestone. The shared UI primitives are configured in `components.json` and use the Tailwind 3-compatible shadcn token convention. After pulling this branch, run `npm install` to install Radix UI, CVA, Sonner and class utilities.
 
 ### Quality checks
 
