@@ -25,9 +25,11 @@ The prompt workspace now calls the Gemini API through a server-side route. Gemin
 
 ### Run locally
 
-Requirements: Node.js 20 or later and npm.
+Requirements: Node.js 20 or later and npm. Create `.env.local` from `.env.example` and add your Google AI Studio API key. Never commit `.env.local` or expose the key in client-side code.
 
 ```bash
+cp .env.example .env.local
+# Edit .env.local and set GEMINI_API_KEY
 npm install
 npm run dev
 ```
