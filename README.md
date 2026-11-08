@@ -2,9 +2,9 @@
 
 Nexus is an early-stage prompt-to-preview product. A user describes a website or app, sees an interactive frontend concept, and refines it through short natural-language edits.
 
-## Current milestone: M2 — stronger generator core
+## Current milestone: M3 — Gemini dynamic website generation
 
-The current implementation uses a deterministic local generation engine. It does not call Gemini or any external AI API.
+The prompt workspace now calls the Gemini API through a server-side route. Gemini creates a structured website specification from each brief; Zod validates the response before the React preview renderer uses it. The legacy local engine remains in the repository for regression/fallback work, but the main generate and refine actions use Gemini.
 
 ### Included
 - shadcn-style component primitives (Button, Badge, Card, Dialog, Input, Textarea, Separator) with Radix UI accessibility foundations
@@ -14,12 +14,12 @@ The current implementation uses a deterministic local generation engine. It does
 - Expanded prompt classification for cafes/restaurants, fashion, SaaS dashboards, portfolios, agencies, education, fitness, real estate and general business concepts
 - Quoted and multi-word brand-name extraction, explicit currency parsing, and prompt-derived color/theme/spacing choices
 - Zod-validated `ProductSpec` as the boundary between generation and rendering
-- Category-aware page recipes, requested-section detection, and category-specific sample catalogues/stats
+- Gemini-authored page composition, section order, copy, design palette, and custom content blocks
 - Responsive desktop, tablet and mobile preview widths
 - Product/menu category filters and product-detail modal
 - Simulated product bag and form interactions
 - SaaS stat cards, sample activity chart and activity table
-- Structured edits for theme, palette, spacing, name, tagline, sections and items
+- Natural-language AI refinement that submits the current specification and preserves unrelated content
 - Browser-local version history, capped at 30 snapshots
 - Generator quality diagnostics, regression tests across business categories, and GitHub Actions CI workflow
 
@@ -32,7 +32,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. The generation API uses `GEMINI_MODEL` (default `gemini-2.5-flash`). Configure the same environment variables in Vercel before deploying.
 
 ### UI component setup
 
@@ -55,7 +55,7 @@ npm run build
 - `add pricing`
 - `add a product`
 
-See [docs/GENERATOR_EVAL.md](docs/GENERATOR_EVAL.md) for the prompt regression set and human review rubric. The local generator is rule-based, not a trained model.\n\n## Honest limitations
+See [docs/GENERATOR_EVAL.md](docs/GENERATOR_EVAL.md) for the prompt regression set and human review rubric. Gemini is an API-powered design agent, not a fine-tuned model. Its output is validated against the website specification and retried once if invalid.\n\n## Honest limitations
 
 This is a frontend concept generator, not a production website deployment service yet. Sample metrics, products, testimonials, locations and prices are illustrative. Cart, checkout, forms, maps and analytics are not connected to real services. Projects are stored in the current browser only; Supabase persistence and authentication are future milestones.
 
