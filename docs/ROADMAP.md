@@ -17,7 +17,7 @@
 - [ ] Add real image/asset selection and upload workflow
 - [ ] Expand layout recipes and accessibility review
 
-## M2 — project workflow
+## M2 — generator core and project workflow\n- [x] Expand category coverage and prompt-intent extraction\n- [x] Add deterministic generator diagnostics and category regression tests\n- [x] Document prompt evaluation set and human quality rubric\n- [ ] Improve visual template variety and section-specific art direction\n- [ ] Add version comparison and restore\n- [ ] Add project dashboard and import/export\n- [ ] Add accessibility diagnostics\n\n## M2.1 — project workflow
 - [ ] Version comparison and restore
 - [ ] Project dashboard and import/export
 - [ ] Diagnostics and accessibility QA

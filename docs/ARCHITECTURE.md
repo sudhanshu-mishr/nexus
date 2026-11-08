@@ -5,8 +5,8 @@ Prompt -> local intent classification -> category recipe + prompt-derived design
 
 The renderer consumes a validated ProductSpec, never raw model output. Local generation is the M0/M1 provider; a future AI provider should implement the same contract.
 
-## M1 preview capabilities
-- Category recipes for cafes/restaurants, fashion storefronts, SaaS dashboards and generic business concepts.
+## M2 generator capabilities
+- Category recipes for cafes/restaurants, fashion, SaaS dashboards, portfolios, agencies, education, fitness, real estate and generic business concepts.\n- Prompt-derived brand, currency, color, theme, spacing and requested-section detection.\n- A deterministic quality diagnostic and regression prompt suite; see [GENERATOR_EVAL.md](GENERATOR_EVAL.md).
 - Product/menu category filters and an item detail dialog.
 - Dashboard stat cards, a sample activity visualization and an activity table.
 - Structured edits for theme, palette, spacing, brand name, tagline, and adding supported sections/items.
