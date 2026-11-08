@@ -18,11 +18,12 @@ const palettes: Record<Category, Palette> = {
 const patterns: Array<[Category, RegExp]> = [
   ["saas", /\b(saas|dashboard|analytics|crm|admin panel|metrics|portal|project management|workflow|b2b software)\b/i],
   ["portfolio", /\b(portfolio|personal website|freelancer|photographer|designer portfolio|artist|creative developer|resume site)\b/i],
+  // Specific fashion intent takes priority over generic words such as “studio” in a brand name.
+  ["fashion", /\b(fashion|clothing|apparel|boutique|outfit|streetwear|fashion store|jewellery|jewelry|sneakers)\b/i],
   ["agency", /\b(agency|studio|consultancy|consulting|marketing firm|creative firm|design firm)\b/i],
   ["education", /\b(education|school|college|university|course|academy|learning platform|tutoring|edtech)\b/i],
   ["fitness", /\b(fitness|gym|workout|yoga|wellness|personal trainer|sports club)\b/i],
   ["realestate", /\b(real estate|property|properties|realtor|estate agency|apartments|homes for sale)\b/i],
-  ["fashion", /\b(fashion|clothing|apparel|boutique|outfit|streetwear|fashion store|jewellery|jewelry|sneakers)\b/i],
   ["cafe", /\b(chai|cafe|café|coffee|restaurant|bakery|menu|food|pizza|burger|diner|bistro)\b/i],
 ];
 
