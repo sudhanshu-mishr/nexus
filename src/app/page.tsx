@@ -1,146 +1,44 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { ArrowUpRight, Check, Monitor, RotateCcw, Smartphone, Sparkles, Tablet, WandSparkles } from "lucide-react";
-import { generateSpec, applyEdit } from "@/lib/engine";
-import type { ProductSpec } from "@/lib/spec";
-import { Preview } from "@/components/Preview";
-
-type Version = { label: string; spec: ProductSpec; createdAt: number };
-const STORAGE_KEY = "nexus-project";
-const examples = [
-  { label: "Cafe / restaurant", prompt: "Create a warm modern chai cafe website called ChaiSutta with a menu, locations and online ordering. Use an earthy orange and cream palette." },
-  { label: "Fashion storefront", prompt: "Build a premium fashion store called Form Studio with an editorial look, product filters and a minimalist layout." },
-  { label: "SaaS dashboard", prompt: "Create a modern SaaS analytics dashboard called Northstar with metrics, charts, a customer activity table and a dark theme." },
+import {useEffect,useState} from "react";
+import {ArrowUpRight,Check,Monitor,RotateCcw,Smartphone,Sparkles,Tablet,WandSparkles} from "lucide-react";
+import {generateSpec,applyEdit} from "@/lib/engine";
+import type {ProductSpec} from "@/lib/spec";
+import {Preview} from "@/components/Preview";
+type Version={label:string;spec:ProductSpec;createdAt:number};
+const KEY="nexus-project";
+const examples=[
+ {label:"Cafe / restaurant",prompt:"Create a warm modern chai cafe website called ChaiSutta with a menu, locations and online ordering. Use an earthy orange and cream palette."},
+ {label:"Fashion storefront",prompt:"Build a premium fashion store called Form Studio with an editorial look, product filters and a minimalist layout."},
+ {label:"SaaS dashboard",prompt:"Create a modern SaaS analytics dashboard called Northstar with metrics, charts, a customer activity table and a dark theme."}
 ];
-
-export default function Home() {
-  const [prompt, setPrompt] = useState(examples[0].prompt);
-  const [versions, setVersions] = useState<Version[]>([]);
-  const [active, setActive] = useState(0);
-  const [edit, setEdit] = useState("");
-  const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [toast, setToast] = useState("");
-  const [loaded, setLoaded] = useState(false);
-  const current = versions[active];
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Version[];
-        if (Array.isArray(parsed) && parsed.every(item => item?.spec?.schemaVersion === "1.0.0")) {
-          setVersions(parsed);
-          setActive(Math.max(0, parsed.length - 1));
-        }
-      }
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } finally {
-      setLoaded(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    if (versions.length) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(versions));
-    else window.localStorage.removeItem(STORAGE_KEY);
-  }, [versions, loaded]);
-
-  function notify(message: string) {
-    setToast(message);
-    window.setTimeout(() => setToast(""), 2600);
-  }
-
-  function saveVersion(label: string, spec: ProductSpec) {
-    const next = [...versions.slice(0, active + 1), { label, spec, createdAt: Date.now() }].slice(-30);
-    setVersions(next);
-    setActive(next.length - 1);
-  }
-
-  function generate() {
-    if (!prompt.trim()) return;
-    try {
-      saveVersion("Initial concept", generateSpec(prompt.trim()));
-      notify("Your interactive preview is ready.");
-    } catch (error) {
-      console.error("Nexus generation failed", error);
-      notify("We couldn't create a valid preview. Your previous version is safe.");
-    }
-  }
-
-  function editPreview() {
-    if (!current || !edit.trim()) return;
-    try {
-      const candidate = applyEdit(current.spec, edit);
-      if (!candidate) {
-        notify("Try: dark theme, premium, change name to…, change tagline to…, add contact, add pricing, or add a product.");
-        return;
-      }
-      saveVersion(edit.trim().slice(0, 48), candidate);
-      setEdit("");
-      notify("A new version has been saved.");
-    } catch (error) {
-      console.error("Nexus edit failed", error);
-      notify("That edit couldn't be applied. The current version is unchanged.");
-    }
-  }
-
-  function startNewProject() {
-    setVersions([]);
-    setActive(0);
-    setEdit("");
-    setPrompt("");
-  }
-
-  if (!loaded) return <main className="ambient min-h-screen" />;
-
-  return (
-    <main className="ambient min-h-screen">
-      {!current ? (
-        <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16">
-          <header className="mb-16 flex items-center justify-between">
-            <div className="text-lg font-semibold tracking-tight">nexus<span className="text-amber-400">.</span></div>
-            <div className="rounded-full border border-white/10 px-4 py-2 text-[10px] uppercase tracking-wider text-zinc-400">Local preview engine · No API key</div>
-          </header>
-          <div className="max-w-4xl rise">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-xs text-amber-200"><Sparkles size={14} /> From idea to interactive preview</div>
-            <h1 className="font-display text-5xl leading-[1.02] tracking-tight md:text-7xl">Your next digital idea,<br /><span className="text-amber-300">made visible.</span></h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Describe the website or app you imagine. Nexus turns it into a frontend concept you can explore, interact with and refine.</p>
-            <div className="glass mt-10 rounded-3xl p-4 md:p-6">
-              <textarea value={prompt} onChange={event => setPrompt(event.target.value)} onKeyDown={event => { if ((event.metaKey || event.ctrlKey) && event.key === "Enter") generate(); }} className="min-h-36 w-full resize-y bg-transparent p-2 text-base leading-7 text-white outline-none placeholder:text-zinc-600" placeholder="Describe the website or app you want to see..." />
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4"><span className="text-xs text-zinc-500">Press Ctrl / ⌘ + Enter to generate. No API key required.</span><button onClick={generate} disabled={!prompt.trim()} className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40">Generate preview <ArrowUpRight size={16} /></button></div>
-            </div>
-            <div className="mt-7 grid gap-3 md:grid-cols-3">{examples.map(example => <button key={example.label} onClick={() => setPrompt(example.prompt)} className="rounded-2xl border border-white/10 p-4 text-left transition hover:border-amber-300/40 hover:bg-white/[.03]"><span className="text-[10px] uppercase tracking-wider text-amber-200/70">{example.label}</span><p className="mt-2 text-xs leading-5 text-zinc-400">{example.prompt}</p></button>)}</div>
-          </div>
-          <footer className="mt-20 text-xs text-zinc-600">Nexus Preview Studio · Prototype · Browser-local project storage</footer>
-        </div>
-      ) : (
-        <div className="min-h-screen">
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 md:px-6">
-            <div className="flex items-center gap-3"><button onClick={startNewProject} className="font-semibold">nexus<span className="text-amber-400">.</span></button><span className="hidden text-xs text-zinc-500 sm:inline">{current.spec.meta.name} · v{active + 1}</span></div>
-            <div className="flex items-center gap-1">
-              {([["desktop", Monitor], ["tablet", Tablet], ["mobile", Smartphone]] as const).map(([key, Icon]) => <button key={key} aria-label={key + " preview"} onClick={() => setDevice(key)} className={\`rounded-lg p-2 \${device === key ? "bg-amber-300 text-zinc-950" : "text-zinc-400 hover:bg-white/10"}\`}><Icon size={17} /></button>)}
-              <button onClick={() => setActive(Math.max(0, active - 1))} disabled={active === 0} title="Previous version" aria-label="Previous version" className="ml-2 rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-25"><RotateCcw size={17} /></button>
-              <button onClick={() => setActive(versions.length - 1)} disabled={active === versions.length - 1} title="Latest version" aria-label="Latest version" className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 disabled:opacity-25"><Check size={17} /></button>
-            </div>
-          </header>
-          <div className="grid min-h-[calc(100vh-57px)] lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="overflow-auto bg-[#07080b] p-3 md:p-5"><div className="mx-auto overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-300" style={{ width: device === "mobile" ? 390 : device === "tablet" ? 768 : "100%", maxWidth: "100%", minHeight: "calc(100vh - 100px)" }}><Preview spec={current.spec} /></div></div>
-            <aside className="border-t border-white/10 p-5 lg:border-l lg:border-t-0">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-[.2em] text-zinc-500"><WandSparkles size={14} /> Refine your concept</div>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">Describe a change. Nexus creates a new version and keeps the earlier one available.</p>
-              <textarea value={edit} onChange={event => setEdit(event.target.value)} onKeyDown={event => { if ((event.metaKey || event.ctrlKey) && event.key === "Enter") editPreview(); }} placeholder={"Make it dark and premium…\nChange name to Chai House\nAdd a contact section"} className="mt-5 min-h-32 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm leading-6 outline-none focus:border-amber-300/50" />
-              <button onClick={editPreview} disabled={!edit.trim()} className="mt-2 w-full rounded-xl bg-amber-300 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40">Apply edit <ArrowUpRight size={14} className="ml-1 inline" /></button>
-              <div className="mt-8 flex items-center justify-between text-xs uppercase tracking-[.2em] text-zinc-500"><span>Version history</span><span>{versions.length}/30</span></div>
-              <div className="mt-3 space-y-2">{versions.map((version, index) => <button key={version.createdAt + "-" + index} onClick={() => setActive(index)} className={\`w-full rounded-xl border p-3 text-left text-xs \${index === active ? "border-amber-300/40 bg-amber-300/5 text-amber-100" : "border-white/10 text-zinc-400"}\`}><div className="flex justify-between"><span className="font-medium">Version {index + 1}</span>{index === active && <Check size={13} />}</div><div className="mt-1 truncate opacity-60">{version.label}</div></button>)}</div>
-              <p className="mt-8 text-xs leading-5 text-zinc-600">Cart, forms, checkout, maps and dashboard data are preview simulations. No real orders or messages are sent.</p>
-              <button onClick={startNewProject} className="mt-5 w-full rounded-xl border border-white/10 py-3 text-xs text-zinc-400 hover:bg-white/5">Start a new project</button>
-            </aside>
-          </div>
-        </div>
-      )}
-      {toast && <div role="status" className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-white px-5 py-3 text-xs text-zinc-900 shadow-xl">{toast}</div>}
-    </main>
-  );
+export default function Home(){
+ const [prompt,setPrompt]=useState(examples[0].prompt),[versions,setVersions]=useState<Version[]>([]),[active,setActive]=useState(0),[edit,setEdit]=useState(""),[device,setDevice]=useState<"desktop"|"tablet"|"mobile">("desktop"),[toast,setToast]=useState(""),[loaded,setLoaded]=useState(false);
+ const current=versions[active];
+ useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const parsed=JSON.parse(raw) as Version[];if(Array.isArray(parsed)&&parsed.every(v=>v?.spec?.schemaVersion==="1.0.0")){setVersions(parsed);setActive(Math.max(0,parsed.length-1));}}}catch{localStorage.removeItem(KEY);}finally{setLoaded(true);}},[]);
+ useEffect(()=>{if(!loaded)return;if(versions.length)localStorage.setItem(KEY,JSON.stringify(versions));else localStorage.removeItem(KEY);},[versions,loaded]);
+ function notify(message:string){setToast(message);window.setTimeout(()=>setToast(""),2600);}
+ function save(label:string,spec:ProductSpec){const next=[...versions.slice(0,active+1),{label,spec,createdAt:Date.now()}].slice(-30);setVersions(next);setActive(next.length-1);}
+ function generate(){if(!prompt.trim())return;try{save("Initial concept",generateSpec(prompt.trim()));notify("Interactive preview ready.");}catch(error){console.error(error);notify("Could not create preview. Previous version is safe.");}}
+ function refine(){if(!current||!edit.trim())return;const next=applyEdit(current.spec,edit);if(!next){notify("Try: dark theme, premium, change name to…, change tagline to…, add contact, add pricing, or add a product.");return;}save(edit.trim().slice(0,48),next);setEdit("");notify("New version saved.");}
+ function reset(){setVersions([]);setActive(0);setEdit("");setPrompt("");}
+ if(!loaded)return <main className="ambient min-h-screen"/>;
+ return <main className="ambient min-h-screen">
+ {!current?<div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16">
+  <header className="mb-16 flex items-center justify-between"><div className="text-lg font-semibold">nexus<span className="text-amber-400">.</span></div><div className="rounded-full border border-white/10 px-4 py-2 text-[10px] uppercase tracking-wider text-zinc-400">Local preview engine · No API key</div></header>
+  <div className="max-w-4xl rise"><div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-xs text-amber-200"><Sparkles size={14}/> From idea to interactive preview</div>
+   <h1 className="font-display text-5xl leading-[1.02] md:text-7xl">Your next digital idea,<br/><span className="text-amber-300">made visible.</span></h1>
+   <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">Describe the website or app you imagine. Nexus turns it into a frontend concept you can explore, interact with and refine.</p>
+   <div className="glass mt-10 rounded-3xl p-4 md:p-6"><textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")generate();}} className="min-h-36 w-full resize-y bg-transparent p-2 text-base leading-7 text-white outline-none" placeholder="Describe the website or app you want to see..."/><div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4"><span className="text-xs text-zinc-500">Press Ctrl / ⌘ + Enter to generate. No API key required.</span><button onClick={generate} disabled={!prompt.trim()} className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-6 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40">Generate preview <ArrowUpRight size={16}/></button></div></div>
+   <div className="mt-7 grid gap-3 md:grid-cols-3">{examples.map(x=><button key={x.label} onClick={()=>setPrompt(x.prompt)} className="rounded-2xl border border-white/10 p-4 text-left hover:border-amber-300/40"><span className="text-[10px] uppercase tracking-wider text-amber-200/70">{x.label}</span><p className="mt-2 text-xs leading-5 text-zinc-400">{x.prompt}</p></button>)}</div>
+  </div><footer className="mt-20 text-xs text-zinc-600">Nexus Preview Studio · Prototype · Browser-local project storage</footer>
+ </div>:<div className="min-h-screen">
+  <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 md:px-6"><div className="flex items-center gap-3"><button onClick={reset} className="font-semibold">nexus<span className="text-amber-400">.</span></button><span className="hidden text-xs text-zinc-500 sm:inline">{current.spec.meta.name} · v{active+1}</span></div><div className="flex items-center gap-1">{([["desktop",Monitor],["tablet",Tablet],["mobile",Smartphone]] as const).map(([key,Icon])=><button key={key} aria-label={key+" preview"} onClick={()=>setDevice(key)} className={`rounded-lg p-2 ${device===key?"bg-amber-300 text-zinc-950":"text-zinc-400 hover:bg-white/10"}`}><Icon size={17}/></button>)}<button onClick={()=>setActive(Math.max(0,active-1))} disabled={active===0} aria-label="Previous version" className="ml-2 rounded-lg p-2 text-zinc-400 disabled:opacity-25"><RotateCcw size={17}/></button><button onClick={()=>setActive(versions.length-1)} disabled={active===versions.length-1} aria-label="Latest version" className="rounded-lg p-2 text-zinc-400 disabled:opacity-25"><Check size={17}/></button></div></header>
+  <div className="grid min-h-[calc(100vh-57px)] lg:grid-cols-[minmax(0,1fr)_320px]"><div className="overflow-auto bg-[#07080b] p-3 md:p-5"><div className="mx-auto overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-300" style={{width:device==="mobile"?390:device==="tablet"?768:"100%",maxWidth:"100%",minHeight:"calc(100vh - 100px)"}}><Preview spec={current.spec}/></div></div>
+   <aside className="border-t border-white/10 p-5 lg:border-l lg:border-t-0"><div className="flex items-center gap-2 text-xs uppercase tracking-[.2em] text-zinc-500"><WandSparkles size={14}/> Refine your concept</div><p className="mt-2 text-sm leading-6 text-zinc-400">Describe a change. Nexus creates a new version and keeps the earlier one available.</p><textarea value={edit} onChange={e=>setEdit(e.target.value)} onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")refine();}} placeholder={"Make it dark and premium…\nChange name to Chai House\nAdd a contact section"} className="mt-5 min-h-32 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm leading-6 outline-none focus:border-amber-300/50"/><button onClick={refine} disabled={!edit.trim()} className="mt-2 w-full rounded-xl bg-amber-300 py-3 text-sm font-semibold text-zinc-950 disabled:opacity-40">Apply edit <ArrowUpRight size={14} className="ml-1 inline"/></button>
+    <div className="mt-8 flex justify-between text-xs uppercase tracking-[.2em] text-zinc-500"><span>Version history</span><span>{versions.length}/30</span></div><div className="mt-3 space-y-2">{versions.map((v,i)=><button key={v.createdAt+"-"+i} onClick={()=>setActive(i)} className={`w-full rounded-xl border p-3 text-left text-xs ${i===active?"border-amber-300/40 bg-amber-300/5 text-amber-100":"border-white/10 text-zinc-400"}`}><div className="flex justify-between"><span>Version {i+1}</span>{i===active&&<Check size={13}/>}</div><div className="mt-1 truncate opacity-60">{v.label}</div></button>)}</div>
+    <p className="mt-8 text-xs leading-5 text-zinc-600">Cart, forms, checkout, maps and dashboard data are preview simulations. No real orders or messages are sent.</p><button onClick={reset} className="mt-5 w-full rounded-xl border border-white/10 py-3 text-xs text-zinc-400 hover:bg-white/5">Start a new project</button>
+   </aside></div>
+ </div>}
+ {toast&&<div role="status" className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-white px-5 py-3 text-xs text-zinc-900 shadow-xl">{toast}</div>}
+ </main>;
 }
