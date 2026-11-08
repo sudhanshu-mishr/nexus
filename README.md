@@ -2,23 +2,23 @@
 
 Nexus is an early-stage prompt-to-preview product. A user describes a website or app, sees an interactive frontend concept, and refines it through short natural-language edits.
 
-## Current milestone: M1 — richer local previews
+## Current milestone: M2 — stronger generator core
 
 The current implementation uses a deterministic local generation engine. It does not call Gemini or any external AI API.
 
 ### Included
 - Next.js 14 App Router, TypeScript and Tailwind CSS
-- Prompt classification for cafes/restaurants, fashion storefronts, SaaS dashboards and general business concepts
-- Multi-word brand-name extraction and prompt-derived color/theme choices
+- Expanded prompt classification for cafes/restaurants, fashion, SaaS dashboards, portfolios, agencies, education, fitness, real estate and general business concepts
+- Quoted and multi-word brand-name extraction, explicit currency parsing, and prompt-derived color/theme/spacing choices
 - Zod-validated `ProductSpec` as the boundary between generation and rendering
-- Category-aware interactive frontend sections
+- Category-aware page recipes, requested-section detection, and category-specific sample catalogues/stats
 - Responsive desktop, tablet and mobile preview widths
 - Product/menu category filters and product-detail modal
 - Simulated product bag and form interactions
 - SaaS stat cards, sample activity chart and activity table
 - Structured edits for theme, palette, spacing, name, tagline, sections and items
 - Browser-local version history, capped at 30 snapshots
-- Unit tests with Vitest and GitHub Actions CI workflow
+- Generator quality diagnostics, regression tests across business categories, and GitHub Actions CI workflow
 
 ### Run locally
 
@@ -48,7 +48,7 @@ npm run build
 - `add pricing`
 - `add a product`
 
-## Honest limitations
+See [docs/GENERATOR_EVAL.md](docs/GENERATOR_EVAL.md) for the prompt regression set and human review rubric. The local generator is rule-based, not a trained model.\n\n## Honest limitations
 
 This is a frontend concept generator, not a production website deployment service yet. Sample metrics, products, testimonials, locations and prices are illustrative. Cart, checkout, forms, maps and analytics are not connected to real services. Projects are stored in the current browser only; Supabase persistence and authentication are future milestones.
 
