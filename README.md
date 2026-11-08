@@ -34,7 +34,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. The generation API uses `GEMINI_MODEL` (default `gemini-2.5-flash`). Configure the same environment variables in Vercel before deploying.
+Open http://localhost:3000. The generation API uses `GEMINI_MODEL` (default `gemini-3.8-flash`). Configure the same environment variables in Vercel before deploying.
 
 ### UI component setup
 
