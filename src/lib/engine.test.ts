@@ -36,6 +36,12 @@ describe("applyEdit", () => {
   it("adds a new product", () => {
     expect(applyEdit(base, "add a product")?.data.items.length).toBe(base.data.items.length + 1);
   });
+  it("supports compound styling requests", () => {
+    const edited = applyEdit(base, "make it dark, premium and green");
+    expect(edited?.design.theme).toBe("dark");
+    expect(edited?.design.spacing).toBe("spacious");
+    expect(edited?.design.palette.primary).toBe("#32734d");
+  });
   it("returns null for unsupported edits", () => {
     expect(applyEdit(base, "connect Stripe payments")).toBeNull();
   });
