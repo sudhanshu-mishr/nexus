@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {ArrowUpRight,Check,Monitor,RotateCcw,Smartphone,Sparkles,Tablet,WandSparkles,LoaderCircle} from "lucide-react";
-import type {ProductSpec} from "@/lib/spec";
+import {ProductSpecSchema,type ProductSpec} from "@/lib/spec";
 import {Preview} from "@/components/Preview";
 import {Button} from "@/components/ui/button";
 import {Textarea} from "@/components/ui/textarea";
@@ -18,7 +18,7 @@ type Device="desktop"|"tablet"|"mobile";
 export default function Home(){
  const [prompt,setPrompt]=useState(examples[0].prompt),[versions,setVersions]=useState<Version[]>([]),[active,setActive]=useState(0),[edit,setEdit]=useState(""),[device,setDevice]=useState<Device>("desktop"),[loaded,setLoaded]=useState(false),[busy,setBusy]=useState(false);
  const current=versions[active];
- useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const parsed=JSON.parse(raw) as Version[];if(Array.isArray(parsed)&&parsed.every(v=>v?.spec?.schemaVersion==="1.0.0")){setVersions(parsed);setActive(Math.max(0,parsed.length-1));}}}catch{localStorage.removeItem(KEY);}finally{setLoaded(true);}},[]);
+ useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const parsed=JSON.parse(raw) as Version[];if(Array.isArray(parsed)){const compatible=parsed.flatMap(v=>{const result=ProductSpecSchema.safeParse(v?.spec);return result.success?[{...v,spec:result.data}]:[];});setVersions(compatible);setActive(Math.max(0,compatible.length-1));}}}catch{localStorage.removeItem(KEY);}finally{setLoaded(true);}},[]);
  useEffect(()=>{if(!loaded)return;if(versions.length)localStorage.setItem(KEY,JSON.stringify(versions));else localStorage.removeItem(KEY);},[versions,loaded]);
  function save(label:string,spec:ProductSpec){const next=[...versions.slice(0,active+1),{label,spec,createdAt:Date.now()}].slice(-30);setVersions(next);setActive(next.length-1);}
  async function runAgent(mode:"generate"|"edit"){

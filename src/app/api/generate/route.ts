@@ -52,7 +52,7 @@ export async function POST(request:Request) {
     const apiKey=process.env.GEMINI_API_KEY;
     if(!apiKey) return NextResponse.json({error:"Gemini is not configured. Add GEMINI_API_KEY to .env.local and your Vercel environment variables."},{status:503});
     const body=RequestSchema.parse(await request.json());
-    const ai=new GoogleGenAI({apiKey});
+    const ai=new GoogleGenAI({apiKey,httpOptions:{timeout:45_000,retryOptions:{attempts:1}}});
     const model=process.env.GEMINI_MODEL||"gemini-3.8-flash";
     const task=body.mode==="edit"
       ? `EDIT REQUEST: ${body.prompt}\nCURRENT VALID WEBSITE SPECIFICATION:\n${JSON.stringify(body.currentSpec)}\nReturn the complete updated specification. Preserve unrelated parts.`
@@ -81,7 +81,14 @@ export async function POST(request:Request) {
     return NextResponse.json({error:"The AI could not produce a valid website specification. Please try refining your prompt.",details:lastError},{status:502});
   } catch(error) {
     if(error instanceof z.ZodError) return NextResponse.json({error:"Invalid generation request.",details:error.issues},{status:400});
-    console.error("Nexus Gemini generation error:",error);
+    const err=error as {name?:string;message?:string;code?:string;cause?:{code?:string;message?:string}};
+    const code=err?.code||err?.cause?.code||"";
+    const message=err?.message||"";
+    const isNetworkTimeout=code==="UND_ERR_HEADERS_TIMEOUT"||code==="UND_ERR_CONNECT_TIMEOUT"||code==="ETIMEDOUT"||/timeout|fetch failed/i.test(message);
+    console.error("Nexus Gemini generation error:",{name:err?.name,code,causeCode:err?.cause?.code,message});
+    if(isNetworkTimeout){
+      return NextResponse.json({error:"Google Gemini did not respond within 45 seconds. Check your internet connection, VPN, firewall or access to generativelanguage.googleapis.com, then try again."},{status:504});
+    }
     return NextResponse.json({error:"Website generation failed. Check the Gemini API key, model access and quota, then try again."},{status:502});
   }
 }
