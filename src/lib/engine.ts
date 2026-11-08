@@ -18,6 +18,7 @@ const palettes: Record<Category, Palette> = {
 const patterns: Array<[Category, RegExp]> = [
   ["saas", /\b(saas|dashboard|analytics|crm|admin panel|metrics|portal|project management|workflow|b2b software)\b/i],
   ["portfolio", /\b(portfolio|personal website|freelancer|photographer|designer portfolio|artist|creative developer|resume site)\b/i],
+  ["fashion", /\b(fashion|clothing|apparel|boutique|outfit|streetwear|fashion store|jewellery|jewelry|sneakers)\b/i],
   ["agency", /\b(agency|studio|consultancy|consulting|marketing firm|creative firm|design firm)\b/i],
   ["education", /\b(education|school|college|university|course|academy|learning platform|tutoring|edtech)\b/i],
   ["fitness", /\b(fitness|gym|workout|yoga|wellness|personal trainer|sports club)\b/i],
@@ -89,6 +90,7 @@ function sectionsFor(category: Category, prompt: string): Section[] {
     chart: "Performance over time",
     table: "Recent activity",
     cta: "Ready to take the next step?",
+    custom: "A closer look",
   };
   const requested = new Set<Section["type"]>();
   if (/\b(testimonials?|reviews?|client stories)\b/i.test(prompt)) requested.add("testimonials");
@@ -263,7 +265,7 @@ export function applyEdit(spec: ProductSpec, request: string): ProductSpec | nul
 
   const addSection = (type: Section["type"], title: string) => {
     if (next.pages[0].sections.some(section => section.type === type)) return;
-    next.pages[0].sections.push({ id: type + "-" + (next.pages[0].sections.length + 1), type, title });
+    next.pages[0].sections.push({ id: type + "-" + (next.pages[0].sections.length + 1), type, title, cards: [] });
     changed = true;
   };
   if (/\b(add|include|show)\b.*\b(testimonials?|reviews?)\b/i.test(raw)) addSection("testimonials", "What people are saying");
