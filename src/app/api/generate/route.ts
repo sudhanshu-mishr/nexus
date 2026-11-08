@@ -59,14 +59,18 @@ export async function POST(request:Request) {
       : `NEW WEBSITE BRIEF:\n${body.prompt}\nCreate a complete bespoke specification.`;
     let lastError="The model returned invalid JSON.";
     for(let attempt=0;attempt<2;attempt++){
-      const interaction=await ai.interactions.create({
+      const response=await ai.models.generateContent({
         model,
-        input:attempt===0?task:`${task}\n\nYour previous response failed validation: ${lastError}. Correct the issues and return valid complete JSON only.`,
-        system_instruction:SYSTEM_INSTRUCTIONS,
-        response_format:{type:"text",mime_type:"application/json",schema:WEBSITE_JSON_SCHEMA},
-        generation_config:{temperature:attempt===0?0.85:0.35,max_output_tokens:12000},
+        contents:attempt===0?task:`${task}\n\nYour previous response failed validation: ${lastError}. Correct the issues and return valid complete JSON only.`,
+        config:{
+          systemInstruction:SYSTEM_INSTRUCTIONS,
+          responseMimeType:"application/json",
+          responseJsonSchema:WEBSITE_JSON_SCHEMA,
+          temperature:attempt===0?0.85:0.35,
+          maxOutputTokens:12000,
+        },
       });
-      const raw=(interaction.output_text||"").trim();
+      const raw=(response.text||"").trim();
       try {
         const parsed=ProductSpecSchema.parse(JSON.parse(raw));
         return NextResponse.json({spec:parsed,model});
